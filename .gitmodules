@@ -1,0 +1,3 @@
+[submodule "merkle-whitelist/lib/forge-std"]
+	path = merkle-whitelist/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
