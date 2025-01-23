@@ -1,0 +1,3 @@
+[submodule "merkle-whitelist-solidity/lib/openzeppelin-contracts"]
+	path = merkle-whitelist-solidity/lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts
