@@ -3677,25 +3677,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "stylus-hello-world"
-version = "0.1.10"
-dependencies = [
- "alloy-primitives",
- "alloy-sol-types",
- "dotenv",
- "ethabi 13.0.0",
- "ethereum-types 0.12.1",
- "ethers",
- "eyre",
- "getrandom",
- "hex",
- "mini-alloc 0.4.2",
- "sha3 0.10.8",
- "stylus-sdk",
- "tokio",
-]
-
-[[package]]
 name = "stylus-proc"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3730,6 +3711,25 @@ dependencies = [
  "mini-alloc 0.6.0",
  "regex",
  "stylus-proc",
+]
+
+[[package]]
+name = "stylus_merkle_whitelist"
+version = "0.1.10"
+dependencies = [
+ "alloy-primitives",
+ "alloy-sol-types",
+ "dotenv",
+ "ethabi 13.0.0",
+ "ethereum-types 0.12.1",
+ "ethers",
+ "eyre",
+ "getrandom",
+ "hex",
+ "mini-alloc 0.4.2",
+ "sha3 0.10.8",
+ "stylus-sdk",
+ "tokio",
 ]
 
 [[package]]
