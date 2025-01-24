@@ -8,7 +8,6 @@ use stylus_sdk::abi::Bytes; // Explicit import for Bytes
 
 sol_storage! {
     #[entrypoint]
-    #[doc = "The WhitelistVerifier contract provides functionality for verifying Merkle proofs."]
     pub struct WhitelistVerifier {}
 }
 
@@ -20,12 +19,15 @@ impl WhitelistVerifier {
         leaf: Bytes,       // Use Bytes for the leaf
         root: Bytes,       // Use Bytes for the Merkle root
     ) -> bool {
-        let mut computed_hash = leaf.to_vec(); // Convert Bytes to Vec<u8>
+        // Preallocate memory to avoid dynamic memory overhead
+        let mut computed_hash = Vec::with_capacity(leaf.len());
+        computed_hash.extend_from_slice(&leaf);
+
+        // Reuse the same Keccak256 hasher instance
+        let mut hasher = Keccak256::new();
 
         for p in proof {
-            let mut hasher = Keccak256::new();
-
-            // Compare slices explicitly
+            hasher.reset(); // Reset the hasher state for the new hash
             if &computed_hash[..] < p.as_slice() {
                 hasher.update(&computed_hash);
                 hasher.update(p.as_slice());
@@ -33,9 +35,10 @@ impl WhitelistVerifier {
                 hasher.update(p.as_slice());
                 hasher.update(&computed_hash);
             }
-            computed_hash = hasher.finalize().to_vec();
+            computed_hash = hasher.finalize_reset().to_vec(); // Use `finalize_reset` to reuse the hasher
         }
 
+        // Compare the computed hash with the provided root
         computed_hash == root.as_slice()
     }
 }

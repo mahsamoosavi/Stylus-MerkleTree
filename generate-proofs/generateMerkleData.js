@@ -40,21 +40,31 @@ console.log("Encoded Data:", encodedData);
 console.log("Leaf:", keccak256(encodedData).toString('hex')); */
 
 const { keccak256, AbiCoder } = require('ethers');
-const abiCoder = new AbiCoder();
 const { MerkleTree } = require('merkletreejs');
 
+// User data with quantities
 const users = [
-    { address: "0x70997970C51812dc3A010C7d01b50e0d17dc79C8", quantity: 1 },
-    { address: "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC", quantity: 2 },
+    { address: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266", quantity: 1 },
+    { address: "0x70997970C51812dc3A010C7d01b50e0d17dc79C8", quantity: 2 },
     { address: "0x90F79bf6EB2c4f870365E785982E1f101E93b906", quantity: 1 }
 ];
 
-const leaves = users.map((user) =>
-    keccak256(abiCoder.encode(['address', 'uint256'], [user.address, user.quantity]))
-);
+// Generate leaves by hashing address and quantity together
+const leaves = users.map((user) => {
+    // ABI encode address and quantity, then hash
+    const encodedData = new AbiCoder().encode(
+        ["address", "uint256"],
+        [user.address, user.quantity]
+    );
+    return keccak256(encodedData);
+});
 
 console.log("Leaves:", leaves);
 
-// create a Merkle tree
-const tree = new MerkleTree(leaves, keccak256, { sort: true });
+// Create a Merkle tree
+const tree = new MerkleTree(leaves, keccak256, { sortPairs: true });
+
 console.log(tree.toString());
+
+// Get Root of Merkle Tree
+console.log(`Here is Root Hash: ${tree.getRoot().toString('hex')}`);
