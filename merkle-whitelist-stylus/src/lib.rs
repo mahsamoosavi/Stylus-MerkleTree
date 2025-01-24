@@ -2,9 +2,9 @@
 extern crate alloc;
 
 use alloc::vec::Vec;
-use sha3::{Digest, Keccak256};
+use alloy_primitives::keccak256; // Import keccak256 for hashing and B256 for fixed-size data
 use stylus_sdk::prelude::*;
-use stylus_sdk::abi::Bytes; // Explicit import for Bytes
+use stylus_sdk::abi::Bytes;
 
 sol_storage! {
     #[entrypoint]
@@ -15,30 +15,26 @@ sol_storage! {
 impl WhitelistVerifier {
     /// Verifies a whitelist using a Merkle proof.
     pub fn verify_whitelist(
-        proof: Vec<Bytes>, // Use Bytes for each proof entry
-        leaf: Bytes,       // Use Bytes for the leaf
-        root: Bytes,       // Use Bytes for the Merkle root
+        proof: Vec<Bytes>, // The proof as a vector of Bytes
+        leaf: Bytes,       // The leaf as Bytes
+        root: Bytes,       // The root as Bytes
     ) -> bool {
-        // Preallocate memory to avoid dynamic memory overhead
-        let mut computed_hash = Vec::with_capacity(leaf.len());
-        computed_hash.extend_from_slice(&leaf);
+        // Start with the leaf as the initial computed hash
+        let mut computed_hash = leaf.to_vec();
 
-        // Reuse the same Keccak256 hasher instance
-        let mut hasher = Keccak256::new();
-
+        // Iterate through the proof elements
         for p in proof {
-            hasher.reset(); // Reset the hasher state for the new hash
-            if &computed_hash[..] < p.as_slice() {
-                hasher.update(&computed_hash);
-                hasher.update(p.as_slice());
+            let proof_element = p.as_slice(); // Use &[u8] for the current proof element
+
+            // Compare as slices
+            computed_hash = if computed_hash.as_slice() < proof_element {
+                keccak256(&[computed_hash.as_slice(), proof_element].concat()).to_vec()
             } else {
-                hasher.update(p.as_slice());
-                hasher.update(&computed_hash);
-            }
-            computed_hash = hasher.finalize_reset().to_vec(); // Use `finalize_reset` to reuse the hasher
+                keccak256(&[proof_element, computed_hash.as_slice()].concat()).to_vec()
+            };
         }
 
-        // Compare the computed hash with the provided root
-        computed_hash == root.as_slice()
+        // Compare the final computed hash to the root
+        computed_hash.as_slice() == root.as_slice()
     }
 }
